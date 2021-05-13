@@ -18,5 +18,5 @@ from django.urls import path
 import class_checkin.views
 urlpatterns = [
     path('manage/', admin.site.urls),
-    path('clockin/',class_checkin.views.message)
+    path('class_clockin/',class_checkin.views.message)
 ]
