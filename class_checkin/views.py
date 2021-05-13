@@ -1,5 +1,5 @@
 from library.library import *
-from library.crop_faces_save import face2_local, face2_base64
+from library.crop_faces_save import *
 
 ######################################### init
 ip = "10.6.0.39"  # 设置度目ip
@@ -18,10 +18,12 @@ def message(request):
         jsonStr = request.body.decode()
         jsonDate = json.loads(jsonStr)
 
-        if jsonDate.get("state", "-1") == 'class_clockin':
+        if jsonDate.get("state", "-1") == 'class_checkin':
             imageData = jsonDate.get("imageData", "")
             if imageData:
-                # jsonresponse = faceSegmentation(imageData)
+                img1 = delete_img_head(imageData)
+                pic_faces = face2_base64_recognize(img1)
+                class_checkin(pic_faces) #图片全部人脸数组传入
                 return JsonResponse({'state': '1', 'log': "包含图片"})
             else:
                 return JsonResponse({'state': '-1', 'log': "未上传图片数据"})
@@ -44,7 +46,7 @@ def message(request):
             return HttpResponse("clockin")
 
 
-# 向度目发送数据
+# 向度目发送数据  返回值为ssid   默认head=True加base64加头文本
 def sendDUMU(imageData, head=True):
     global ip
 
@@ -123,3 +125,10 @@ def addDUMUface(imageData, studentId, head=True):
     else:
         print("注册人脸失败", studentId)
         return {"state": "-1", "log": res.get("log")}
+
+def class_checkin(pic_faces):
+    # 此处需要 一个图片人脸数组
+    students_id = []
+    for pic in pic_faces:
+        students_id.append(sendDUMU(imageData=pic, head=False))
+    print(students_id)

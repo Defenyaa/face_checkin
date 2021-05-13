@@ -140,3 +140,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # 最大上传大小  8mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 8242880
+
+# 图片储存根路径
+MEDIA_ROOT = os.path.join(BASE_DIR, 'picture')
+# 图片访问url
+MEDIA_URL = '/IMG/'
