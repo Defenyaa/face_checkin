@@ -1,5 +1,4 @@
 import os
-from library.crop_faces_save import face2_local
 from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 import requests as req

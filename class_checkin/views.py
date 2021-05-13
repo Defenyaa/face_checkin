@@ -1,15 +1,15 @@
 from library.library import *
 from library.crop_faces_save import face2_local, face2_base64
+
 ######################################### init
 ip = "10.6.0.39"  # 设置度目ip
 BASE_DIR = Path(__file__).resolve().parent.parent
-room = "$"
-
 # 所有学生
-students = {'班级': '班级'}
-# 存储在场学生,不在场学生
+room = "$"
+students = {}
 students_isroom = {}
 students_notroom = {}
+
 
 ######################################## init end
 
@@ -27,26 +27,31 @@ def message(request):
                 return JsonResponse({'state': '-1', 'log': "未上传图片数据"})
         if jsonDate.get("state", "-1") == 'register_face':
             imageData = jsonDate.get("imageData", "")
-            if imageData:
-                face2_base64(imageData)
-
-                return JsonResponse({'state': '1', 'log': "包含图片"})
+            studentId = jsonDate.get("studentId", "")
+            if imageData and studentId[::-1][:1] == 'x' or studentId[::-1][:1] == 'X':
+                # 去除x
+                studentId = studentId[0:len(studentId) - 1]
+                img1 = face2_base64(delete_img_head(imageData))
+                res = addDUMUface(imageData=img1, studentId=studentId, head=False)
+                return JsonResponse(res)
             else:
-                return JsonResponse({'state': '-1', 'log': "未上传图片数据"})
+                return JsonResponse({'state': '-1', 'log': "请求数据不正确"})
             pass
+
+
 
         else:
             return HttpResponse("clockin")
 
 
 # 向度目发送数据
-def sendDUMU(imageData):
+def sendDUMU(imageData, head=True):
     global ip
 
     url = "http://" + ip + ":8080/recognitionManage/identify"
-
-    # 删除imageData前面的头文件 data:image/jpeg;base64,
-    imageData = delete_img_head(imageData)
+    if head:
+        # 删除imageData前面的头文件 data:image/jpeg;base64,
+        imageData = delete_img_head(imageData)
 
     # 处理data数据
     data = {
@@ -86,3 +91,35 @@ def sendDUMU(imageData):
     else:
         return "1"
 
+# 向度目添加人脸数据
+def addDUMUface(imageData, studentId, head=True):
+    global ip
+
+    # 注册用户接口
+    url = "http://" + ip + ":8080/userManage/addUser"
+
+    if head:
+        imageData = imageData[imageData.find(",") + 1:]
+
+    data = {
+        "pass": "1a100d2c0dab19c4430e7d73762b3423",
+        "user_id": studentId,
+        "image_content": imageData,
+        "image_type": "image",
+        "user_info": {"name": studentId, "phone_number": "1234567891"},
+        "action_type": "APPEND",
+        "quality_control": "NONE",
+        "auth_start_time": 0,
+        "auth_end_time": 0
+    }
+
+    headers = {'Content-Type': 'application/json'}
+
+    res = req.post(url=url, headers=headers, data=json.dumps(data)).json()
+
+    if res.get("code", True):
+        print("注册人脸成功", studentId)
+        return {"state": "1", "log": "成功"}
+    else:
+        print("注册人脸失败", studentId)
+        return {"state": "-1", "log": res.get("log")}
