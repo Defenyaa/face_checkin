@@ -18,7 +18,7 @@ class class_student(models.Model):
 class query_log(models.Model):
     date = models.DateTimeField(verbose_name="查询时间", blank=True)
     class_room = models.CharField(max_length=30, verbose_name='班级')
-    picture = models.ImageField(verbose_name='班级图片',null=True, upload_to='class_img/')
+    picture = models.ImageField(verbose_name='班级图片', null=True, upload_to='class_img/', blank=True)
     log = models.CharField(max_length=3000, verbose_name='查询结果')
 
 

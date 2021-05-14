@@ -1,14 +1,17 @@
 from library.library import *
 from library.crop_faces_save import *
+from class_checkin.models import class_student, query_log
 
 ######################################### init
 ip = "10.6.0.39"  # 设置度目ip
 BASE_DIR = Path(__file__).resolve().parent.parent
 # 所有学生
 room = "$"
-students = {}
-students_isroom = {}
-students_notroom = {}
+
+
+# students = {}
+# students_isroom = {}
+# students_notroom = {}
 
 
 ######################################## init end
@@ -20,11 +23,12 @@ def message(request):
 
         if jsonDate.get("state", "-1") == 'class_checkin':
             imageData = jsonDate.get("imageData", "")
+            continueValidate = jsonDate.get("continueValidate", "0")
             if imageData:
                 img1 = delete_img_head(imageData)
                 pic_faces = face2_base64_recognize(img1)
-                class_checkin(pic_faces) #图片全部人脸数组传入
-                return JsonResponse({'state': '1', 'log': "包含图片"})
+                result = class_checkin(pic_faces, continueValidate)  # 图片全部人脸数组传入
+                return JsonResponse(result, safe=False)
             else:
                 return JsonResponse({'state': '-1', 'log': "未上传图片数据"})
         if jsonDate.get("state", "-1") == 'register_face':
@@ -93,6 +97,7 @@ def sendDUMU(imageData, head=True):
     else:
         return "1"
 
+
 # 向度目添加人脸数据
 def addDUMUface(imageData, studentId, head=True):
     global ip
@@ -126,9 +131,79 @@ def addDUMUface(imageData, studentId, head=True):
         print("注册人脸失败", studentId)
         return {"state": "-1", "log": res.get("log")}
 
-def class_checkin(pic_faces):
+
+# 批量班级考勤
+def class_checkin(pic_faces, Continue_validate=False):
+    global room
+    room = ''
     # 此处需要 一个图片人脸数组
-    students_id = []
+    students_id = set()
+    hq_class = dict()
     for pic in pic_faces:
-        students_id.append(sendDUMU(imageData=pic, head=False))
+        students_id.add(sendDUMU(imageData=pic, head=False))
+
+    # print(students_id)
+
+    ########################
+    # 更新room
+    k = 0
+    for l in students_id:
+        k += 1
+        if k > 5:  # 循环5次
+            break
+
+        stds = class_student.objects.filter(sid__exact=l)
+        if len(stds) >= 1:
+            std = stds[0].class_room
+
+            if hq_class.get(std):
+                hq_class[std] = hq_class[std] + 1
+            else:
+                hq_class[std] = 1
+
+    hq_class2 = list()
+    for b in hq_class.values():
+        hq_class2.append(b)
+    hq_class2.sort()
+    for a, b in hq_class.items():
+        if b == hq_class2[len(hq_class2) - 1]:
+            room = a
+
+    if room == '':
+        return {'state': '-1', 'log': "未获取到班级"}
+    ########################
+
+    stu_all = class_student.objects.filter(class_room__exact=room)
+    if Continue_validate == False:
+        stu_all.update(isroom=False)
+
     print(students_id)
+    for id in students_id:
+        stds = stu_all.all().filter(sid__exact=id)
+        if len(stds):
+            stds.update(isroom=True)
+
+    # notroom = stu_all.all().filter(isroom__exact=False)
+    # isroom = stu_all.all().filter(isroom__exact=True)
+    students = list()
+    students.clear()
+    """
+        [{id:'',name:'',isroom:''},
+        ]
+    """
+
+    for i in stu_all.all():
+        tmp = {'sid': i.sid, 'name': i.name, 'isroom': i.isroom}
+        students.append(tmp)
+
+    add_query_log(students)
+    return students
+
+
+def add_query_log(log):
+    global room
+    log = str([log])
+    date = datetime.datetime.now()
+
+    data = query_log(class_room=room, date=date, log=log)
+    data.save()
