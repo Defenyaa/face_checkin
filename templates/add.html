@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>添加人脸</title>
+<!--Custom Theme files-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/style.css" rel="stylesheet" type="text/css" media="all" />
+
+
+
+<script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+</head>
+<body>
+
+	<div class="main">
+
+		<div class="signin-form profile" id="add">
+			<h3>{{text1}}<span>{{text}}</span></h3>
+			<img :src="imageData" alt="" @click="clickImage"/>
+			<input type="file" id="uploader" capture="user" accept="image/*" multiple="" style="display:none"  @change="changeImage($event)">
+			<div class="login-form" >
+
+	
+					<input  type="text" placeholder="Your student ID" required="" id="studentid">
+					<button @click="clicksubmit">注册人脸</button>
+
+			</div>
+			<p><a href="./index.html">返回主页</a></p>
+		</div>
+		
+	</div>
+					
+</body>
+<script src="./js/addface.js"></script>
+</html>
