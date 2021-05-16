@@ -50,7 +50,7 @@ def generate_images(faces, img, path_save):
         cv2.imwrite(path_save + str(num + 1) + ".jpg", img_blank)
 
 
-def face2_local():
+def face2():
     # 读取图像的路径
     path_read = "data/images/cin/"
     img = cv2.imread(path_read + "xx.jpg")
@@ -115,7 +115,7 @@ def face2_base64_recognize(img_base64):
     faces = face_segmentation(img)
 
     if len(faces) >= 13:
-        a, b = 100, 50
+        a, b = 60, 43
         pass
     else:
         a, b = 100, 50
@@ -133,6 +133,7 @@ def face2_base64_recognize(img_base64):
             for j in range(width):
                 img_blank[i][j] = img[face.top() - b + i][face.left() - b + j]
 
+
         base64_str = cv2.imencode('.jpg', img_blank)[1].tostring()
         base64_str_bytes = base64.b64encode(base64_str)
         # 将bytes转为str add
@@ -141,3 +142,5 @@ def face2_base64_recognize(img_base64):
     # print(students_faces)
     # print(len(students_faces))
     return students_faces
+
+

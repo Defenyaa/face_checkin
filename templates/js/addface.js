@@ -86,7 +86,6 @@ let add = new Vue({
             add.imageData = result
         },
        
-       
         sendImage(){
             //处理bodyDate数据
     

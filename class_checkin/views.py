@@ -3,7 +3,7 @@ from library.crop_faces_save import *
 from class_checkin.models import class_student, query_log
 
 ######################################### init
-ip = "10.6.0.39"  # 设置度目ip
+ip = "10.6.0.39"  # 设置度目ip3
 BASE_DIR = Path(__file__).resolve().parent.parent
 # 所有学生
 room = "$"
@@ -32,6 +32,13 @@ def message(request):
             else:
                 return JsonResponse({'state': '-1', 'log': "未上传图片数据"})
         if jsonDate.get("state", "-1") == 'register_face':
+            """
+            {
+                "state":"register_face",
+                "studentId":"204804246x",
+                "imageData":"data:image/jpeg;base64,/9j/"
+            }
+            """
             imageData = jsonDate.get("imageData", "")
             studentId = jsonDate.get("studentId", "")
             if imageData and studentId[::-1][:1] == 'x' or studentId[::-1][:1] == 'X':
