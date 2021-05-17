@@ -61,6 +61,7 @@ def message(request):
 def sendDUMU(imageData, head=True):
     global ip
 
+    #改为公网
     url = "http://" + ip + ":8080/recognitionManage/identify"
     if head:
         # 删除imageData前面的头文件 data:image/jpeg;base64,

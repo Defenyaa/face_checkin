@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'class_checkin.apps.ClassCheckinConfig',
     'corsheaders',
+    'import_export'
 
 ]
 
